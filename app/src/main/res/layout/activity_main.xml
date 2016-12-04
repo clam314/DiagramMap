@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@android:color/white"
     tools:context="com.clam314.diagrammap.MainActivity">
 
-    <com.clam314.diagrammap.TenPolyGon
+    <com.clam314.diagrammap.SimpleDiagramMap
+        android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="200dp"
+        android:minHeight="150dp"
+        app:textColor="#333333"
+        app:textSize="16sp"
+        app:mapColor="@android:color/holo_purple"
+        app:maximum="10"
+        />
 </RelativeLayout>
