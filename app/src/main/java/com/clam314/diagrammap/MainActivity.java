@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,10 +18,12 @@ public class MainActivity extends AppCompatActivity {
 
     public static List<SimpleDiagramMap.Item> testItem(){
         String[] itemName = new String[]{"火力","雷装","对空","回避","耐久"};
+        int[] res = new int[]{R.drawable.ico_atk,R.drawable.ico_torpedo,R.drawable.ico_aa,R.drawable.ico_evasion,R.drawable.ico_hp};
         List<SimpleDiagramMap.Item> mItemList = new ArrayList<>();
-        for(String s: itemName){
+        for(int i=0; i < itemName.length; i++){
             SimpleDiagramMap.Item item = new SimpleDiagramMap.Item();
-            item.itemName = s;
+            item.itemName = itemName[i];
+            item.imageRes = res[i];
             item.value = (float) Math.random()*10;
             mItemList.add(item);
         }

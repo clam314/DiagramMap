@@ -2,6 +2,8 @@ package com.clam314.diagrammap;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -25,6 +27,7 @@ public class SimpleDiagramMap extends View {
     private int colorLineBase;
     private int colorText;
     private int mTextSize;
+    private int bitmapHeight;
     private float mTotalValue;//最大刻度
     private List<Point> points;
     private List<Item> mItemList;
@@ -33,6 +36,8 @@ public class SimpleDiagramMap extends View {
     public static class Item{
         float value;
         String itemName;
+        int imageRes;
+        private Bitmap bitmap;
     }
 
     private class Point {
@@ -43,6 +48,7 @@ public class SimpleDiagramMap extends View {
         if(items == null || items.size() == 0) return;
         mItemList = items;
         itemNum = mItemList.size();
+        initItemBitmap(items);
         invalidate();
     }
 
@@ -51,6 +57,11 @@ public class SimpleDiagramMap extends View {
         setItemList(items);
     }
 
+    private void initItemBitmap(List<Item> items){
+        for(Item item : items){
+            item.bitmap = BitmapFactory.decodeResource(getResources(),item.imageRes);
+        }
+    }
 
     public SimpleDiagramMap(Context context) {
         super(context);
@@ -95,14 +106,22 @@ public class SimpleDiagramMap extends View {
         drawMap(canvas);
     }
 
-    private void initPoint(int itemNum, float distance, boolean isX){
+    private void initPoint(int itemNum, float distance, boolean isY){
         float angle = (float) ((2*Math.PI)/itemNum);
         float radius ;
-        if(isX){
-            //水平方向较短,计算半径时只考虑字高
+        if(isY){
+            //垂直方向较短,计算半径时只考虑字高
             radius = (distance - 4 * mTextSize)/2;
+            //增加了图标的显示，还要考虑图标高度
+            for(Item item : mItemList){
+                if(item.bitmap != null){
+                    bitmapHeight = item.bitmap.getHeight();
+                    radius = radius - item.bitmap.getHeight();
+                    break;
+                }
+            }
         }else {
-            //垂直方向较短,计算半径时要考虑字长的总长度
+            //水平方向较短,计算半径时要考虑字长的总长度
             int maxLength = 0;
             for(Item item : mItemList){
                 if(item.itemName.length() > maxLength){
@@ -146,13 +165,15 @@ public class SimpleDiagramMap extends View {
 //            }
         }
 
-        //绘制各项文字
+        //绘制各项文字和各项图标
+        Paint bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         TextPaint tPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         tPaint.setColor(colorText);
         tPaint.setTextSize(mTextSize);
         for(int i = 0; i < itemNum; i++){
             Point point = points.get(i);
             Item item = mItemList.get(i);
+            float imageHeight = item.bitmap.getHeight(),imageWidth = item.bitmap.getWidth();
             float mx = point.x;
             float my = point.y;
             float textLength = item.itemName.length() * mTextSize;
@@ -161,22 +182,24 @@ public class SimpleDiagramMap extends View {
                 if(my < 0){
                     my = my - mTextSize/2;
                 }else {
-                    my = my + mTextSize*3/2;
+                    my = my + mTextSize*3/2 + imageHeight;
                 }
             }else if(mx > 0){
                 mx = mx + mTextSize/2;
                 if(my > 0){
-                    my = my + mTextSize/2;
+                    my = my + mTextSize/2 + imageHeight;
                 }
             }else if(mx < 0){
                 mx = mx - textLength - mTextSize/2;
                 if(my > 0){
-                    my = my + mTextSize/2;
+                    my = my + mTextSize/2+imageHeight;
                 }
             }
+            float bx = mx + textLength/2 - imageWidth/2;//注意图片的绘制是以左上角为起点的，而且文字是基线即大概是左下角为起点的
+            float by = my - mTextSize - imageHeight;
             canvas.drawText(item.itemName,mx,my,tPaint);
+            canvas.drawBitmap(item.bitmap,bx,by,bitmapPaint);
         }
-
 
         //绘制各项数据的分布图
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -204,5 +227,4 @@ public class SimpleDiagramMap extends View {
         }
         canvas.drawPath(path,paintPath);
     }
-
 }
